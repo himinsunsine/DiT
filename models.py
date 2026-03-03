@@ -104,7 +104,7 @@ class DiTBlock(nn.Module):
     """
     def __init__(self, hidden_size, num_heads, mlp_ratio=4.0, **block_kwargs):
         super().__init__()
-        self.norm1 = nn.LayerNorm(hidden_size, elementwise_affine=False, eps=1e-6) # elementwise_affine=False: LN 자체에 learnable gamma/beta가 없음 출력: (N, T, D)
+        self.norm1 = nn.LayerNorm(hidden_size, elementwise_affine=False, eps=1e-6) # elementwise_affine=False: LN 자체에 learnable gamma/beta가 없음. adaLN_modulation에서 scale/shift를 만들어서 적용
         self.attn = Attention(hidden_size, num_heads=num_heads, qkv_bias=True, **block_kwargs)
         self.norm2 = nn.LayerNorm(hidden_size, elementwise_affine=False, eps=1e-6)
         mlp_hidden_dim = int(hidden_size * mlp_ratio) # MLP 내부 차원 = D * mlp_ratio
@@ -112,7 +112,7 @@ class DiTBlock(nn.Module):
         self.mlp = Mlp(in_features=hidden_size, hidden_features=mlp_hidden_dim, act_layer=approx_gelu, drop=0)
         self.adaLN_modulation = nn.Sequential(
             nn.SiLU(),
-            nn.Linear(hidden_size, 6 * hidden_size, bias=True) #조건 벡터 c (N, D)를 받아서 (N, 6D)로 변환, attention/mlp용 shift,scale,gate 따로 
+            nn.Linear(hidden_size, 6 * hidden_size, bias=True) #조건 벡터 c (N, D)를 받아서 (N, 6D)로 변환, attention/mlp용 shift,scale,gate 따로 만듦
         )
 
     def forward(self, x, c):
