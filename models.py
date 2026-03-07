@@ -261,7 +261,7 @@ class DiT(nn.Module):
         # This can be done by uncommenting the following line and commenting-out the line following that.
         # eps, rest = model_out[:, :self.in_channels], model_out[:, self.in_channels:]
         
-        eps, rest = model_out[:, :3], model_out[:, 3:] #“재현성” 이유로 eps를 앞 3채널만 CFG 적용하도록 고정
+        eps, rest = model_out[:, :3], model_out[:, 3:] #이미지는 3채널이니 eps를 앞 3채널만 CFG 적용하도록 고정
         cond_eps, uncond_eps = torch.split(eps, len(eps) // 2, dim=0) #배치 절반씩 나눠 cond_eps: (N/2, 3, H, W), uncond_eps: (N/2, 3, H, W)
         half_eps = uncond_eps + cfg_scale * (cond_eps - uncond_eps) #guided = uncond + s * (cond - uncond)
         eps = torch.cat([half_eps, half_eps], dim=0) #다시 배치 크기 N으로 맞춤(둘 다 같은 guided eps로 채움)
